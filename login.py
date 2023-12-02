@@ -2,12 +2,17 @@ from pathlib import Path
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from signup import Form2  # Import the Form2 class from signup.py
+from backendfunctions import login_user
 
 class Login(QDialog):
 
     def __init__(self, parent=None):
         super(Login, self).__init__(parent)
 
+       # Create a QLabel for displaying warnings or error messages
+        self.warningText = QLabel("")
+        self.warningText.setObjectName("warningText")
         ###### stylesheets
         self.setStyleSheet(Path('signup.qss').read_text())
 
@@ -48,11 +53,14 @@ class Login(QDialog):
         self.button.setFixedSize(130,45)
         self.button.setObjectName("login")
         self.button.clicked.connect(self.__getInfo)
+       
+    
 
-        ##### signup button
+         ##### signup button
         self.signupButton = QPushButton("Signup")
         self.signupButton.setFixedSize(100,35)
-        
+        self.signupButton.clicked.connect(self.openSignupForm)  # Connecting the button here
+
 
         ###### create the format
         self.__createFormFormat()
@@ -62,10 +70,13 @@ class Login(QDialog):
         self.mainLayout.addWidget(self.formGroupBox)
         self.mainLayout.addWidget(self.button, alignment=Qt.AlignCenter | Qt.AlignBottom)
         self.mainLayout.addWidget(self.signupButton, alignment=Qt.AlignCenter | Qt.AlignBottom)
-
+        self.mainLayout.addWidget(self.warningText, alignment=Qt.AlignCenter)
+        
         ##### main layout of the window/widget
         self.setLayout(self.mainLayout)
-    
+
+        # Connect the signup button to the new function
+        self.signupButton.clicked.connect(self.openSignupForm)
 
 
     """
@@ -96,8 +107,19 @@ class Login(QDialog):
     Gets the string inside the edit text when button is pressed.
     """
     def __getInfo(self):
-        self.enteredUsername = self.usernameBox.text()
-        self.enteredPassword = self.passwordBox.text()
+        enteredEmail = self.usernameBox.text()
+        enteredPassword = self.passwordBox.text()
 
-        #####
-        print(f'{self.enteredUsername}\n{self.enteredPassword}')
+        success, message = login_user(enteredEmail, enteredPassword)
+
+        if success:
+            self.warningText.setText("Login successful!")
+            # Proceed with next steps after successful login
+        else:
+            self.warningText.setText(message)  # Display the error message
+
+
+    def openSignupForm(self):
+        # This function opens the signup form
+        self.signupForm = Form2(self)
+        self.signupForm.show()

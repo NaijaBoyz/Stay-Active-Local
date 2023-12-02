@@ -4,7 +4,7 @@ from pathlib import Path
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-
+from signup import Form2
 
 # window dimensions
 maxWidth = 500; maxHeight = 500
@@ -173,20 +173,13 @@ class Form2(QDialog):
 
 
 
+
 if __name__ == '__main__':
-    # Create the Qt Application
     app = QApplication(sys.argv)
 
-    # Create and show the form
-    #form = Form2()
-    
-    ######### testing for login.py #########
-
-    form = Login()
-
-
-    #window.show()
-    form.show()
+    # Create and show the login form
+    loginForm = Login()
+    loginForm.show()
 
     # Run the main Qt loop
     sys.exit(app.exec())
