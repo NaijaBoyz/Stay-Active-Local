@@ -50,7 +50,7 @@ def login_user(email, password):
 
         return False, "Failed to login: " + error_message
 
-
+'''
 # Function to create an event
 def create_event(user_id,event_name,location, size_of_party, date_time, cost, sport, description, age_requirement):
     event_data = {
@@ -63,6 +63,25 @@ def create_event(user_id,event_name,location, size_of_party, date_time, cost, sp
         "Description": description,
         "EventCreatorID": user_id,
         "AgeRequirement": age_requirement
+    }
+    # Add the event data to Firestore and extract the DocumentReference
+    _, event_ref = db.collection('Events').add(event_data)
+    print("Event created with ID:", event_ref.id)
+    return event_ref.id
+'''
+#Function to create an event
+def create_event(event_info):       #modified to take event_info dictionary
+    user_id = event_info['EventCreatorID']
+    event_data = {
+       "Event Name": event_info['Event Name'],
+        "Location": event_info['Location'],
+        "SizeOfParty": event_info['Size of Party'],
+        "DateTime": event_info['DateTime'],
+        "Cost": event_info['Cost'],
+        "Sport": event_info['Sport'],
+        "Description": event_info['Description'],
+        "EventCreatorID": user_id,
+        "AgeRequirement": event_info['Age Requirement']
     }
     # Add the event data to Firestore and extract the DocumentReference
     _, event_ref = db.collection('Events').add(event_data)
