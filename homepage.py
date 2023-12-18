@@ -11,6 +11,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pathlib import Path
 import sys
+from create_event import EventCreatorApp
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -211,7 +212,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         
     def __createEvent(self):
-        print("create event here")
+
+        event = EventCreatorApp(self)
+        event.show()
+
+
 
 
 
@@ -238,6 +243,7 @@ class EventBox(QtWidgets.QGroupBox):
         self.gridLayoutWidget = QtWidgets.QWidget(self)
         self.gridLayoutWidget.setGeometry(QtCore.QRect(9, 19, 771, 111))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
+        self.gridLayoutWidget.setContentsMargins(10,0,20,0)
         self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setContentsMargins(0, 0, 0, 15)
         self.gridLayout.setSpacing(15)
@@ -275,6 +281,13 @@ class EventBox(QtWidgets.QGroupBox):
         self.description.setObjectName("description")
         self.gridLayout.addWidget(self.description, 2, 0, 1, 1)
 
+        self.detailsButton = QtWidgets.QPushButton(self.gridLayoutWidget)
+        self.detailsButton.setFixedSize(QtCore.QSize(120,30))
+        self.detailsButton.setContentsMargins(0,10,150,10)
+        self.detailsButton.clicked.connect(self.__detailsButton)
+        self.gridLayout.addWidget(self.detailsButton, 0, 3, 1, 1)
+
+
         # translation for whatever idk what for
         # I think the setText or smthg
         _translate = QtCore.QCoreApplication.translate
@@ -284,6 +297,11 @@ class EventBox(QtWidgets.QGroupBox):
         self.location.setText(_translate("MainWindow", "Location"))
         self.host.setText(_translate("MainWindow", "Host"))
         self.sport.setText(_translate("MainWindow", "Sport"))
+        self.detailsButton.setText(_translate("MainWindow", "Details"))
+
+    
+    def __detailsButton(self):
+        print("Details button clicked!")
 
 
 

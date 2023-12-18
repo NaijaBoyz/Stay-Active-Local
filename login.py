@@ -1,9 +1,11 @@
+import sys
 from pathlib import Path
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from signup import Form2  # Import the Form2 class from signup.py
 from backendfunctions import login_user
+from homepage import Ui_MainWindow as Homepage
 
 class Login(QDialog):
 
@@ -24,7 +26,11 @@ class Login(QDialog):
         textBoxWidth = 80
         textBoxHeight = 30
 
-        self.setGeometry(100,100,self.windowWidth,self.windowHeight)
+        sg = QDesktopWidget().availableGeometry()
+        initx = sg.width() - self.geometry().width()
+        inity = sg.height()-600
+
+        self.setGeometry(initx,inity,self.windowWidth,self.windowHeight)
         self.formGroupBox = QGroupBox("Login") 
 
         ##### login label
@@ -116,6 +122,12 @@ class Login(QDialog):
 
         if success:
             self.warningText.setText("Login successful!")
+            
+            homepage = Homepage(self)
+            homepage.show()
+            homepageGeometry = homepage.geometry()
+            homepage.move(homepageGeometry.x(), homepageGeometry.y()+70)
+            self.hide()
             # Proceed with next steps after successful login
         else:
             self.warningText.setText(message)  # Display the error message
