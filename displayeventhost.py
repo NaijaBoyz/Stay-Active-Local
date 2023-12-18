@@ -6,8 +6,8 @@ import sys
 
 # Define the PyQt window class
 class EventWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super(EventWindow, self).__init__(parent)
         self.initUI()
 
     def initUI(self):
