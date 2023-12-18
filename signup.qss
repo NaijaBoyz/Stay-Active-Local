@@ -44,6 +44,14 @@ QPushButton#signup {
   outline: 0px;
 }
 
+QPushButton#login::hover {
+    border: 2px solid #330066;
+}
+
+QPushButton#signup::hover {
+    border: 2px solid #330066;
+}
+
 
 /******************************
     SIGNUP PAGE 
@@ -86,6 +94,73 @@ QLabel#warning {
     color: #ff0000;
     font-size: 12 px;
 }
+
+/*************************
+    HOME PAGE
+
+
+*************************/
+
+QMainWindow#MainWindow {
+    background-color: #a0bfe0
+}
+
+QLabel#eventsLabel {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+QPlainTextEdit#searchLine {
+    font-size: 16px;
+    padding-bottom: 0px;
+}
+
+QPushButton#searchButton {
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    border: 1px solid #0d6efd;
+    padding: 5px 15px;
+    margin-top: 3px;
+    outline: 0px;
+}
+
+QPushButton#createEventButton {
+    background-color: #0d6efd;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid #0d6efd;
+    outline: 0px;
+}
+
+QPushButton#createEventButton::hover {
+    border: 2px solid #330066;
+}
+
+QPushButton#searchButton::hover {
+    border: 2px solid #330066;
+}
+
+
+/********************
+    EVENT BOX
+
+
+
+********************/
+
+QLabel#eventTitle {
+    border: 2px solid #000033;
+    font-size: 18px; 
+    font-style: italic;
+    padding: 3px;
+}
+
+QGroupBox#eventBox::hover {
+    border: 2px solid #330066;
+}
+
 
 QComboBox {
     font-family: Georgia;

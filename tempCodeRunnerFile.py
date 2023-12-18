@@ -1,0 +1,1 @@
+self.signupButton.clicked.connect(self.openSignupForm)

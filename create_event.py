@@ -1,9 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QLineEdit, QTextEdit, QFormLayout, QSpinBox, QDoubleSpinBox, QComboBox
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QLineEdit, QTextEdit, QFormLayout, QSpinBox, QDoubleSpinBox, QComboBox, QDialog
 
-class EventCreatorApp(QWidget):
-    def __init__(self):
-        super().__init__()
+class EventCreatorApp(QDialog):
+    def __init__(self, parent=None):
+        super(QWidget, self).__init__(parent)
 
         # Create a list to store event information
         self.event_list = []
@@ -54,10 +54,10 @@ class EventCreatorApp(QWidget):
 
         # Set window properties
         self.setWindowTitle('Event Creator')
-        self.setGeometry(300, 300, 400, 300)
+        self.setGeometry(550, 300, 400, 300)
 
         # Show the window
-        self.show()
+        #self.show()
 
     def create_event_clicked(self):
         # Retrieve input values from the input fields
@@ -92,4 +92,5 @@ if __name__ == '__main__':
     #run the PyQt application
     app = QApplication(sys.argv)
     ex = EventCreatorApp()
+    ex.show()
     sys.exit(app.exec_())
