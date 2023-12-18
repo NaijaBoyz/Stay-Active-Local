@@ -1,5 +1,6 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QLineEdit, QTextEdit, QFormLayout, QSpinBox, QDoubleSpinBox, QComboBox, QDialog
+from PyQt5.QtWidgets import QApplication, QDialog, QLabel, QLineEdit, QTextEdit, QFormLayout, QSpinBox, QDoubleSpinBox, QComboBox, QPushButton
+from PyQt5.QtCore import Qt
 
 class EventCreatorApp(QDialog):
     def __init__(self, parent=None):
@@ -29,7 +30,8 @@ class EventCreatorApp(QDialog):
 
         sport_label = QLabel('Sport:')
         self.sport_input = QComboBox()
-        self.sport_input.addItems(['Football', 'Basketball', 'Soccer', 'Other'])
+        self.populate_sports_list()  # Populate sports list from file
+        self.sport_input.addItems(self.sports_list)
 
         description_label = QLabel('Description:')
         self.description_input = QTextEdit()
@@ -57,7 +59,14 @@ class EventCreatorApp(QDialog):
         self.setGeometry(550, 300, 400, 300)
 
         # Show the window
-        #self.show()
+        self.show()
+
+    def populate_sports_list(self):
+        try:
+            with open('sports.txt', 'r') as file:
+                self.sports_list = [line.strip() for line in file.readlines()]
+        except FileNotFoundError:
+            self.sports_list = ['Football', 'Basketball', 'Soccer', 'Other']
 
     def create_event_clicked(self):
         # Retrieve input values from the input fields
@@ -77,20 +86,45 @@ class EventCreatorApp(QDialog):
             'Age Requirement': age_requirement,
             'Cost': cost,
             'Sport': sport,
-            'Description': description
+            'Description': description,
+            'EventCreatorID': "user_id_placeholder"  # Replace with firebase user ID retrieval logic
         }
 
+        # Call the backend function to create an event
+        create_event(event_info)
+
+        # Optional: Clear the input fields or perform other actions
+        self.event_name_input.clear()
+        self.location_input.clear()
+        self.size_input.clear()
+        self.age_input.clear()
+        self.cost_input.clear()
+        self.sport_input.clear()
+        self.description_input.clear()
+
+    '''
         # Append/addthe dictionary to the event list
         self.event_list.append(event_info)
 
         # Optional, print the event list to verify the stored information
         print("Event List:")
-        for event in self.event_list:
-            print(event)
+            for event in self.event_list:
+                print(event)
+    '''
 
 if __name__ == '__main__':
-    #run the PyQt application
+    # Run the PyQt application
     app = QApplication(sys.argv)
     ex = EventCreatorApp()
-    ex.show()
+    #ex.show()
     sys.exit(app.exec_())
+
+
+
+
+
+    
+
+
+
+
