@@ -3,9 +3,9 @@ import ssl
 from email.message import EmailMessage
 
 # Define email sender and receiver
-email_sender = 'aceonyeks@gmail.com'
-email_password = 'qywsdapvwpnrifdp'
-email_receiver = 'stephanieonyekwere1561@gmail.com'
+email_sender = ''
+email_password = ''
+email_receiver = ''
 
 # Set the subject and body of the email
 subject = 'Welcome to Stay Active Local !'
