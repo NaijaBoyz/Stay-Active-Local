@@ -118,19 +118,23 @@ class Login(QDialog):
         enteredEmail = self.usernameBox.text()
         enteredPassword = self.passwordBox.text()
 
-        success, message = login_user(enteredEmail, enteredPassword)
+        # Call the login function
+        success, response = login_user(enteredEmail, enteredPassword)
 
         if success:
-            self.warningText.setText("Login successful!")
-            
-            homepage = Homepage(self)
+            # Extract the user's Firebase ID
+            user_id = response.split("uid: ")[-1]
+
+            # Instantiate the Homepage class with the user ID
+            homepage = Homepage(self, user_id=user_id)
             homepage.show()
             homepageGeometry = homepage.geometry()
             homepage.move(homepageGeometry.x(), homepageGeometry.y()+70)
             self.hide()
-            # Proceed with next steps after successful login
         else:
-            self.warningText.setText(message)  # Display the error message
+            # Show error message on failure
+            self.warningText.setText(response)
+
 
 
     def openSignupForm(self):

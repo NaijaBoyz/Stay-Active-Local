@@ -14,10 +14,15 @@ import sys
 from create_event import EventCreatorApp
 from displayeventuser import EventWindow as EventWindowUser
 from displayeventhost import EventWindow as EventWindowHost
+from backendfunctions import get_all_events, get_user_events,get_user_name_by_id,search_events
+
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, user_id=None):
         super(QtWidgets.QMainWindow, self).__init__(parent)
+
+        
+       
 
         self.setObjectName("MainWindow")
         self.resize(984, 828)
@@ -96,15 +101,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.eventsList = []
 
 
-        self.eventBox1 = EventBox(False)
+        self.eventBox1 = EventBox(False, {})
+    
        # self.events.addWidget(self.eventBox1)
         self.eventsList.append(self.eventBox1)
 
-        self.eventBox2 = EventBox(False)
+        self.eventBox2 = EventBox(False, {})
         #self.events.addWidget(self.eventBox2)
         self.eventsList.append(self.eventBox2)
 
-        self.eventBox3 = EventBox(False)
+        self.eventBox3 = EventBox(False, {})
         #self.events.addWidget(self.eventBox3)
         self.eventsList.append(self.eventBox3)
 
@@ -132,11 +138,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.myEventsList = []
 
-        self.myEvent1 = EventBox(True)
+        self.myEvent1 = EventBox(True,{})
         self.myEventsList.append(self.myEvent1)
 
         # my cycling event example
-        self.myEvent2 = self.addEvent(EventBox(True))
+        self.myEvent2 = self.addEvent(EventBox(True,{}))
         self.myEventsList.append(self.myEvent2)
 
         for event in self.myEventsList:
@@ -167,6 +173,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.retranslateUi(self)
         QtCore.QMetaObject.connectSlotsByName(self)
 
+        
+        self.createEventDialog = None
+        self.user_id = user_id
+
+
+        
+        self.load_events()
+        if self.user_id:
+            self.load_user_events(self.user_id)
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -196,28 +212,86 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     # adds the details of the events to the event box
     #  filled with test items for now.
     #
-    def addEvent(self, eventBox:QtWidgets.QGroupBox):
-        eventTitle = "Cycle Bowie"
-        eventDateTime = "some date and time format"
-        eventSport = "Cycling"
-        eventLocation = "Bowie, MD"
-        eventHost = "James Jaluag"
-        eventDescription = "Fun cycling exercise around Bowie!"
+    def addEvent(self, eventBox: QtWidgets.QGroupBox):
+        # Test event data
+        event_data = {
+            "Event Name": "Cycle Bowie",
+            "DateTime": "some date and time format",
+            "Sport": "Cycling",
+            "Location": "Bowie, MD",
+            "EventCreatorID": "dummy_id",  # Dummy creator ID
+            "Description": "Fun cycling exercise around Bowie!"
+        }
 
-        eventBox.eventTitle.setText(eventTitle)
-        eventBox.dateTime.setText(eventDateTime)
-        eventBox.sport.setText(eventSport)
-        eventBox.location.setText(eventLocation)
-        eventBox.host.setText(eventHost)
-        eventBox.description.setText(eventDescription)
-
+        eventBox.set_event_data(event_data, "James Jaluag")
         return eventBox
 
         
     def __createEvent(self):
+        if self.createEventDialog is not None:
+            self.createEventDialog.close()  # Close the existing dialog if any
+        self.createEventDialog = EventCreatorApp(self.user_id, self)
+        self.createEventDialog.show()
+ 
 
-        event = EventCreatorApp(self)
-        event.show()
+    
+    def load_events(self):
+        # Clear existing events in the list
+        for i in reversed(range(self.events.count())):
+            self.events.itemAt(i).widget().setParent(None)
+
+        # Load all events from Firebase
+        all_events = get_all_events()
+        for event_data in all_events:
+            event_creator_name = get_user_name_by_id(event_data["EventCreatorID"])
+            is_owner = event_data["EventCreatorID"] == self.user_id
+            event_box = EventBox(is_owner, event_data)
+            event_box.set_event_data(event_data, event_creator_name)
+            self.events.addWidget(event_box)
+
+
+    def load_user_events(self, user_id):
+        # Clear existing events in the myEvents list
+        for i in reversed(range(self.myEvents.count())):
+            self.myEvents.itemAt(i).widget().setParent(None)
+
+        # Load user-specific events from Firebase
+        user_events = get_user_events(user_id)
+        for event_data in user_events:
+            event_creator_name = get_user_name_by_id(event_data["EventCreatorID"])
+            event_box = EventBox(True, event_data)
+            event_box.set_event_data(event_data, event_creator_name)
+            self.myEvents.addWidget(event_box)
+    
+    def __getText(self):
+        # Get the text from the search box
+        search_query = self.searchLine.toPlainText()
+        
+        # Use the search function from backendfunctions.py
+        matching_events = search_events(search_query)
+         
+        # For simplicity, we will clear the events list and repopulate it with the search results.
+        for i in reversed(range(self.events.count())):
+            self.events.itemAt(i).widget().setParent(None)
+
+        if matching_events:
+            for event_data in matching_events:
+                event_creator_name = get_user_name_by_id(event_data["EventCreatorID"])
+                event_box = EventBox(False)
+                event_box.set_event_data(event_data, event_creator_name)
+                self.events.addWidget(event_box)
+        else:
+            print("No matching events found.")
+
+        # For debugging
+        print(f"Found {len(matching_events)} events for search query '{search_query}'")
+    
+
+
+
+
+    
+
 
 
 
@@ -236,12 +310,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
 class EventBox(QtWidgets.QGroupBox):
 
-    def __init__(self, owner, parent=None):
+    def __init__(self, is_owner, event_data, parent=None):
         super(EventBox, self).__init__(parent)
+        self.is_owner = is_owner
+        self.event_data = event_data if event_data else {}
 
-        # signifies if the user is the owner of the event.
-        # bool
-        self.owner = owner
 
         self.setFixedSize(QtCore.QSize(770, 125))
         self.setObjectName("eventBox")
@@ -312,16 +385,25 @@ class EventBox(QtWidgets.QGroupBox):
     ##
     def __detailsButton(self):
         # if owner
-        if self.owner:
-            print("Im owner")
-            event = EventWindowHost(self)
-            event.show()
+            # If the user is the owner, open the event window for the host
+            if self.is_owner:
+                print("I'm the owner")
+                event_window = EventWindowHost(self.event_data, self)
+            # Otherwise, open the event window for a regular user
+            else:
+                print("Just a user")
+                event_window = EventWindowUser(self.event_data, self)
+            
+            event_window.show()
 
-        else:
-            print("just a user")
-            event = EventWindowUser(self)
-            event.show()
-        
+    def set_event_data(self, event_data, event_creator_name):
+        # Set the text for each UI element with data from event_data
+        self.eventTitle.setText(event_data.get("Event Name", "Unknown Event"))
+        self.dateTime.setText(event_data.get("DateTime", "Unknown Date/Time"))
+        self.sport.setText(event_data.get("Sport", "Unknown Sport"))
+        self.location.setText(event_data.get("Location", "Unknown Location"))
+        self.host.setText(event_creator_name)  # Use the name instead of the ID
+        self.description.setText(event_data.get("Description", "No description provided."))
 
 
 
