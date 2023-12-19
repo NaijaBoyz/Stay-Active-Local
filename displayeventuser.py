@@ -7,12 +7,16 @@ from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QLabel, QPushButton, QText
 from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
+from backendfunctions import add_attendee_to_event
+from PyQt5.QtWidgets import QMessageBox 
+
 
 # Define the PyQt window class
 class EventWindow(QMainWindow):
-    def __init__(self, event_data, parent=None):
+    def __init__(self, event_data,user_id,parent=None):
         super(EventWindow, self).__init__(parent)
         self.event_data = event_data
+        self.user_id = user_id 
         self.initUI()
 
     def initUI(self):
@@ -45,6 +49,7 @@ class EventWindow(QMainWindow):
         # Join Event Button
         self.join_event_button = QPushButton("Join Event", self)
         self.join_event_button.setStyleSheet("font-size: 18px; font-weight: bold; padding: 10px; margin-top: 20px;")
+        self.join_event_button.clicked.connect(self.joinEvent) 
         layout.addWidget(self.join_event_button)
 
         # Set the layout for the central widget
@@ -52,4 +57,11 @@ class EventWindow(QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
+    def joinEvent(self):
+        # Call the backend function to add the attendee
+        event_id = self.event_data.get("id")  # Get event ID from event_data
+        add_attendee_to_event(event_id, self.user_id)
+        print("Joined the event:", event_id)
+
+        QMessageBox.information(self, "Event Joined", "You have successfully joined the event!")
 

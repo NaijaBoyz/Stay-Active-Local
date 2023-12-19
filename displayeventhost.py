@@ -3,11 +3,14 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
 import sys
+from backendfunctions import add_attendee_to_event, cancel_event
+from PyQt5.QtWidgets import QMessageBox 
 
 class EventWindow(QMainWindow):
-    def __init__(self, event_data, parent=None):
+    def __init__(self, event_data, user_id, parent=None):
         super(EventWindow, self).__init__(parent)
         self.event_data = event_data
+        self.user_id = user_id 
         self.initUI()
 
     def initUI(self):
@@ -45,6 +48,9 @@ class EventWindow(QMainWindow):
 
         # Join Event Button
         self.join_event_button = QPushButton("Join Event", self)
+   
+        self.join_event_button.clicked.connect(self.joinEvent)
+
         main_layout.addWidget(self.join_event_button)
 
         # Horizontal layout for Edit and Cancel buttons
@@ -53,6 +59,7 @@ class EventWindow(QMainWindow):
         self.cancel_event_button = QPushButton("Cancel Event", self)
         button_layout.addWidget(self.edit_event_button)
         button_layout.addWidget(self.cancel_event_button)
+        self.cancel_event_button.clicked.connect(self.cancelEvent)
         
         # Add the button layout to the main layout
         main_layout.addLayout(button_layout)
@@ -61,6 +68,23 @@ class EventWindow(QMainWindow):
         central_widget = QWidget()
         central_widget.setLayout(main_layout)
         self.setCentralWidget(central_widget)
+
+    def joinEvent(self):
+            # Call the backend function to add the attendee
+            event_id = self.event_data.get("id")  # Get event ID from event_data
+            add_attendee_to_event(event_id, self.user_id)
+            print("Joined the event:", event_id)
+            QMessageBox.information(self, "Event Joined", "You have successfully joined the event!")
+
+    def cancelEvent(self):
+        event_id = self.event_data.get("id")  # Get event ID from event_data
+        success, message = cancel_event(event_id)
+        if success:
+            QMessageBox.information(self, "Event Cancelled", message)
+            # You might want to close the window or update the UI here
+        else:
+            QMessageBox.warning(self, "Cancellation Failed", message)
+
 
 # Run the application
 def main():
@@ -71,7 +95,8 @@ def main():
         "Location": "Central Park, New York",
         "Description": "Join us for a friendly soccer match at Central Park."
     }
-    window = EventWindow(event_data)
+    user_id=1
+    window = EventWindow(event_data, user_id)
     window.show()
     sys.exit(app.exec_())
 

@@ -102,16 +102,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.eventsList = []
 
 
-        self.eventBox1 = EventBox(False, {})
+        self.eventBox1 = EventBox(False, {}, self.user_id)
     
        # self.events.addWidget(self.eventBox1)
         self.eventsList.append(self.eventBox1)
 
-        self.eventBox2 = EventBox(False, {})
+        self.eventBox2 = EventBox(False, {}, self.user_id)
         #self.events.addWidget(self.eventBox2)
         self.eventsList.append(self.eventBox2)
 
-        self.eventBox3 = EventBox(False, {})
+        self.eventBox3 = EventBox(False, {}, self.user_id)
         #self.events.addWidget(self.eventBox3)
         self.eventsList.append(self.eventBox3)
 
@@ -149,11 +149,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.myEventsList = []
 
-        self.myEvent1 = EventBox(True,{})
+        self.myEvent1 = EventBox(True,{}, self.user_id)
         self.myEventsList.append(self.myEvent1)
 
         # my cycling event example
-        self.myEvent2 = self.addEvent(EventBox(True,{}))
+        self.myEvent2 = self.addEvent(EventBox(True,{},self.user_id))
         self.myEventsList.append(self.myEvent2)
 
         for event in self.myEventsList:
@@ -266,7 +266,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         for event_data in all_events:
             event_creator_name = get_user_name_by_id(event_data["EventCreatorID"])
             is_owner = event_data["EventCreatorID"] == self.user_id
-            event_box = EventBox(is_owner, event_data)
+            event_box = EventBox(is_owner, event_data, self.user_id)
             event_box.set_event_data(event_data, event_creator_name)
             self.events.addWidget(event_box)
 
@@ -280,7 +280,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         user_events = get_user_events(user_id)
         for event_data in user_events:
             event_creator_name = get_user_name_by_id(event_data["EventCreatorID"])
-            event_box = EventBox(True, event_data)
+            event_box = EventBox(True, event_data, self.user_id)  # Add user_id here
             event_box.set_event_data(event_data, event_creator_name)
             self.myEvents.addWidget(event_box)
     
@@ -297,17 +297,18 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         user_events = get_user_events(self.user_id)
         for event_data in user_events:
             event_creator_name = get_user_name_by_id(event_data["EventCreatorID"])
-            event_box = EventBox(True, event_data)
+            # Include self.user_id when initializing EventBox
+            event_box = EventBox(True, event_data, self.user_id)
             event_box.set_event_data(event_data, event_creator_name)
             self.myEvents.addWidget(event_box)
-
+            
     def __getText(self):
-        # Get the text from the search box
+    # Get the text from the search box
         search_query = self.searchLine.toPlainText()
-        
+
         # Use the search function from backendfunctions.py
         matching_events = search_events(search_query)
-         
+
         # For simplicity, we will clear the events list and repopulate it with the search results.
         for i in reversed(range(self.events.count())):
             self.events.itemAt(i).widget().setParent(None)
@@ -315,7 +316,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         if matching_events:
             for event_data in matching_events:
                 event_creator_name = get_user_name_by_id(event_data["EventCreatorID"])
-                event_box = EventBox(False)
+                # Include self.user_id when initializing EventBox
+                event_box = EventBox(False, event_data, self.user_id)
                 event_box.set_event_data(event_data, event_creator_name)
                 self.events.addWidget(event_box)
         else:
@@ -323,7 +325,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         # For debugging
         print(f"Found {len(matching_events)} events for search query '{search_query}'")
-    
+
 
 
 
@@ -348,10 +350,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
 class EventBox(QtWidgets.QGroupBox):
 
-    def __init__(self, is_owner, event_data, parent=None):
+    def __init__(self, is_owner, event_data, user_id, parent=None):
         super(EventBox, self).__init__(parent)
         self.is_owner = is_owner
         self.event_data = event_data if event_data else {}
+        self.user_id = user_id 
 
 
         self.setFixedSize(QtCore.QSize(770, 125))
@@ -426,11 +429,11 @@ class EventBox(QtWidgets.QGroupBox):
             # If the user is the owner, open the event window for the host
             if self.is_owner:
                 print("I'm the owner")
-                event_window = EventWindowHost(self.event_data, self)
+                event_window = EventWindowHost(self.event_data, self.user_id, self)
             # Otherwise, open the event window for a regular user
             else:
                 print("Just a user")
-                event_window = EventWindowUser(self.event_data, self)
+                event_window = EventWindowUser(self.event_data, self.user_id,self)
             
             event_window.show()
 
