@@ -21,13 +21,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None, user_id=None):
         super(QtWidgets.QMainWindow, self).__init__(parent)
 
-        
-       
-
         self.setObjectName("MainWindow")
         self.resize(984, 828)
 
         self.setStyleSheet(Path('signup.qss').read_text())
+
+        self.createEventDialog = None
+        self.user_id = user_id
 
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
@@ -76,6 +76,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         
         self.createEventButton.clicked.connect(self.__createEvent)
 
+
         ##### makes the events VBox scrollable
         self.scrollArea = QtWidgets.QScrollArea(self.frame)
         self.scrollArea.setGeometry(QtCore.QRect(50, 150, 831, 231))
@@ -118,6 +119,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         for event in self.eventsList:
             self.events.addWidget(event)
 
+
+        ##### refresh button for the user
+        self.refreshButton = QtWidgets.QPushButton(self.frame)
+        self.refreshButton.setGeometry(QtCore.QRect(800, 120, 75, 23))
+        self.refreshButton.setObjectName("refreshButton")
+
+        self.refreshButton.clicked.connect(self.load_events)
+
+
+
         ##### add the widget attached to the vbox to the scroll area.
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
@@ -159,7 +170,15 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.myEventsLabel = QtWidgets.QLabel(self.frame)
         self.myEventsLabel.setGeometry(QtCore.QRect(50, 305, 100, 200))
         self.myEventsLabel.setObjectName("eventsLabel")
-         
+
+        ##### refresh button for the user's events
+        self.refreshButtonUser = QtWidgets.QPushButton(self.frame)
+        self.refreshButtonUser.setGeometry(QtCore.QRect(800, 390, 75, 23))
+        self.refreshButtonUser.setObjectName("refreshButton")
+
+        self.refreshButtonUser.clicked.connect(self.__load_user_events2) 
+
+        
         self.setCentralWidget(self.centralwidget)
 
         self.menubar = QtWidgets.QMenuBar(self)
@@ -174,8 +193,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
 
         
-        self.createEventDialog = None
-        self.user_id = user_id
+        #self.createEventDialog = None
+        #self.user_id = user_id
 
 
         
@@ -191,6 +210,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.createEventButton.setText(_translate("MainWindow", "CreateEvent"))
         self.myEventsLabel.setText(_translate("MainWindow", "My Events"))
         self.eventsLabel.setText(_translate("MainWindow", "Events"))
+        self.refreshButton.setText(_translate("MainWindow", "Refresh"))
+        self.refreshButtonUser.setText(_translate("MainWindow", "Refresh"))
         #self.eventBox.setTitle(_translate("MainWindow", "Event"))
         #self.label_3.setText(_translate("MainWindow", "TextLabel"))
         #self.label.setText(_translate("MainWindow", "TextLabel"))
@@ -263,6 +284,23 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             event_box.set_event_data(event_data, event_creator_name)
             self.myEvents.addWidget(event_box)
     
+    ###
+    # private version of the load user events for the refresh button.
+    # uses the global self.user_id instead of the argument style.
+    ###
+    def __load_user_events2(self):
+        # Clear existing events in the myEvents list
+        for i in reversed(range(self.myEvents.count())):
+            self.myEvents.itemAt(i).widget().setParent(None)
+
+        # Load user-specific events from Firebase
+        user_events = get_user_events(self.user_id)
+        for event_data in user_events:
+            event_creator_name = get_user_name_by_id(event_data["EventCreatorID"])
+            event_box = EventBox(True, event_data)
+            event_box.set_event_data(event_data, event_creator_name)
+            self.myEvents.addWidget(event_box)
+
     def __getText(self):
         # Get the text from the search box
         search_query = self.searchLine.toPlainText()

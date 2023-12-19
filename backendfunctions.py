@@ -4,7 +4,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 # Load Firebase configuration from JSON file
-config_path = r"C:\Users\gbemi\Desktop\Stay-Active-Local\jsondonotupload\firebase_config.json"
+config_path = r"C:\Users\James\Desktop\StayActive\firebase_config.json"
 with open(config_path, 'r') as config_file:
     config = json.load(config_file)
 
@@ -13,7 +13,7 @@ firebase = pyrebase.initialize_app(config)
 auth = firebase.auth()  # This initializes the auth object for Firebase Authentication
 
 # Initialize Firestore with your private key
-cred = credentials.Certificate(r"C:\Users\gbemi\Desktop\Stay-Active-Local\jsondonotupload\stay-active-local-firebase-adminsdk-q7ijl-1adfaf9109.json")
+cred = credentials.Certificate(r"C:\Users\James\Desktop\StayActive\stay-active-local-firebase-adminsdk-q7ijl-1adfaf9109.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()  # This initializes the Firestore client
 

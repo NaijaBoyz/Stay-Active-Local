@@ -27,8 +27,8 @@ class Login(QDialog):
         textBoxHeight = 30
 
         sg = QDesktopWidget().availableGeometry()
-        initx = sg.width() - self.geometry().width()
-        inity = sg.height()-600
+        initx = (sg.width()/2) - (self.geometry().width()/2) + 100
+        inity = sg.height()-700
 
         self.setGeometry(initx,inity,self.windowWidth,self.windowHeight)
         self.formGroupBox = QGroupBox("Login") 
