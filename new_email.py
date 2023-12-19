@@ -1,33 +1,33 @@
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+import ssl
+from email.message import EmailMessage
 
-def send_email(receiver_address, subject, body):
-    # Sender and receiver details
-    sender_address = 'your_email@gmail.com'
-    sender_password = 'your_password'
+# Define email sender and receiver
+email_sender = 'aceonyeks@gmail.com'
+email_password = 'qywsdapvwpnrifdp'
+email_receiver = 'stephanieonyekwere1561@gmail.com'
 
-    # Setup MIME
-    message = MIMEMultipart()
-    message['From'] = sender_address
-    message['To'] = receiver_address
-    message['Subject'] = subject
+# Set the subject and body of the email
+subject = 'Welcome to Stay Active Local !'
+body = """
+Welcome to Stay Active Local!
 
-    # Body of the email
-    message.attach(MIMEText(body, 'plain'))
+    We're excited to have you on board. Get ready to explore and join local sports activities around you.
 
-    # Create SMTP session for sending the mail
-    session = smtplib.SMTP('smtp.gmail.com', 587)  # use gmail with port
-    session.starttls()  # enable security
-    session.login(sender_address, sender_password)  # login with mail_id and password
+    Stay active, stay connected!
 
-    text = message.as_string()
-    session.sendmail(sender_address, receiver_address, text)
-    session.quit()
+"""
 
-    print(f'Mail Sent to {receiver_address}')
+em = EmailMessage()
+em['From'] = email_sender
+em['To'] = email_receiver
+em['Subject'] = subject
+em.set_content(body)
 
-# Example usage
-send_email("receiver@example.com", "Welcome to Stay Active Local!", "Thank you for signing up for our app. Stay active and connected!")
+# Add SSL (layer of security)
+context = ssl.create_default_context()
 
-
+# Log in and send the email
+with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+    smtp.login(email_sender, email_password)
+    smtp.sendmail(email_sender, email_receiver, em.as_string())
