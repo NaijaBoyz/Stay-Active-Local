@@ -52,7 +52,8 @@ def login_user(email, password):
 
 
 # Function to create an event
-def create_event(user_id,event_name,location, size_of_party, date_time, cost, sport, description, age_requirement):
+def create_event(user_id, event_name, location, size_of_party, date_time, cost, sport, description, age_requirement):
+    # Function body
     event_data = {
         "Event Name": event_name,
         "Location": location,
@@ -74,6 +75,67 @@ def add_attendee_to_event(event_id, user_id):
     # Adding an attendee to the EventAttendees subcollection in Firestore
     db.collection('Events').document(event_id).collection('EventAttendees').add({'UserID': user_id})
     print(f"User {user_id} added as an attendee to event {event_id}")
+
+
+def get_all_events():
+    events = []
+    try:
+        # Fetch all documents in the Events collection
+        docs = db.collection('Events').get()
+        for doc in docs:
+            event = doc.to_dict()
+            event['id'] = doc.id  # Add the document ID to the event data
+            events.append(event)
+        return events
+    except Exception as e:
+        print("Error getting documents: ", str(e))
+        return []
+
+def get_user_events(user_id):
+    events = []
+    try:
+        # Fetch events where the user is the creator
+        docs = db.collection('Events').where(field_path='EventCreatorID', op_string='==', value=user_id).get()
+
+        for doc in docs:
+            event = doc.to_dict()
+            event['id'] = doc.id
+            events.append(event)
+        return events
+    except Exception as e:
+        print("Error getting user events: ", str(e))
+        return []
+    
+def get_user_name_by_id(user_id):
+    user_ref = db.collection('Users').document(user_id).get()
+    if user_ref.exists:
+        user = user_ref.to_dict()
+        return user.get('Name', 'Unknown User')  # Return the user's name or a default value
+    else:
+        return 'Unknown User'
+    
+
+def search_events(search_query):
+    events = []
+    try:
+        # Fetch all events
+        event_docs = db.collection('Events').get()
+        # Loop through each event and fetch the host's name
+        for event_doc in event_docs:
+            event = event_doc.to_dict()
+            # Fetch the host's name
+            user_ref = db.collection('Users').document(event["EventCreatorID"]).get()
+            user_name = user_ref.to_dict().get('Name', '') if user_ref.exists else 'Unknown'
+            event['Host Name'] = user_name
+            # Check if search_query is in the event details or host's name
+            if search_query.lower() in json.dumps(event).lower() or search_query.lower() in user_name.lower():
+                event['id'] = event_doc.id
+                events.append(event)
+        return events
+    except Exception as e:
+        print("Error searching for events: ", str(e))
+        return []
+
 
 # Main function to demonstrate usage
 def main():

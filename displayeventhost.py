@@ -1,13 +1,13 @@
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QLabel,
-                             QPushButton, QLineEdit, QWidget, QTextEdit, QHBoxLayout)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QLabel, QPushButton, QWidget, QTextEdit, QHBoxLayout)
 from PyQt5.QtCore import Qt
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtCore import QUrl
 import sys
 
-
-# Define the PyQt window class
 class EventWindow(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, event_data, parent=None):
         super(EventWindow, self).__init__(parent)
+        self.event_data = event_data
         self.initUI()
 
     def initUI(self):
@@ -17,11 +17,11 @@ class EventWindow(QMainWindow):
         # Main layout
         main_layout = QVBoxLayout()
 
-          # Event Name Header
-        self.event_header_label = QLabel("Event Name", self)
+        # Event Name Header
+        event_name = self.event_data.get("Event Name", "Unknown Event")
+        self.event_header_label = QLabel(event_name, self)
         self.event_header_label.setAlignment(Qt.AlignCenter)
-        self.event_header_label.setStyleSheet(
-            "font-size: 24px; font-weight: bold; margin-bottom: 20px;")
+        self.event_header_label.setStyleSheet("font-size: 24px; font-weight: bold; margin-bottom: 20px;")
         main_layout.addWidget(self.event_header_label)
 
         # Viewing as Host Label
@@ -30,16 +30,16 @@ class EventWindow(QMainWindow):
         self.viewing_as_host_label.setStyleSheet("margin-right: 10px; margin-top: -20px; margin-bottom: 20px;")
         main_layout.addWidget(self.viewing_as_host_label)
 
-        # Placeholder for Map
-        self.map_placeholder_label = QLabel("Location of event map(Xavier)", self)
-        self.map_placeholder_label.setAlignment(Qt.AlignCenter)
-        self.map_placeholder_label.setStyleSheet(
-            "background-color: #e0e0e0; padding: 50px; margin-bottom: 20px;")
-        main_layout.addWidget(self.map_placeholder_label)
+        # Map Display
+        self.map_view = QWebEngineView(self)
+        map_url = "http://maps.google.com/?q={}".format(self.event_data.get("Location", ""))
+        self.map_view.load(QUrl(map_url))
+        self.map_view.setFixedHeight(200)  # Set the map height
+        main_layout.addWidget(self.map_view)
 
         # Event Information Text Box
-        self.event_info_text_box = QTextEdit(self)
-        self.event_info_text_box.setPlaceholderText("Display Info about Event")
+        description = self.event_data.get("Description", "No description provided.")
+        self.event_info_text_box = QTextEdit(description, self)
         self.event_info_text_box.setReadOnly(True)
         main_layout.addWidget(self.event_info_text_box)
 
@@ -65,7 +65,13 @@ class EventWindow(QMainWindow):
 # Run the application
 def main():
     app = QApplication(sys.argv)
-    window = EventWindow()
+    # Example event data, replace with actual data
+    event_data = {
+        "Event Name": "Community Soccer Game",
+        "Location": "Central Park, New York",
+        "Description": "Join us for a friendly soccer match at Central Park."
+    }
+    window = EventWindow(event_data)
     window.show()
     sys.exit(app.exec_())
 
